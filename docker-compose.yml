@@ -1,28 +1,18 @@
-version: '3.8'
+version: '3.9'
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: production
-    container_name: nestjs-app
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
+  db:
+    image: postgres:16-alpine # ← было 17.6-alpine
+    env_file:
+      - .env
     environment:
-      - NODE_ENV=production
-      - PORT=3000
-    networks:
-      - nestjs-network
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 40s
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - '5433:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
-networks:
-  nestjs-network:
-    driver: bridge
-
+volumes:
+  pgdata:
