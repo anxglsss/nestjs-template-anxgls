@@ -1,13 +1,15 @@
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import cookieParser from 'cookie-parser';
+import { GlobalValidationPipe } from '@shared/pipes/global-validation.pipe';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
-import { GlobalValidationPipe } from './shared/pipes/global-validation.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+
+  app.setGlobalPrefix('api');
 
   app.use(cookieParser());
 
@@ -21,8 +23,8 @@ async function bootstrap() {
   app.useGlobalPipes(GlobalValidationPipe);
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('NestJS Template')
-    .setDescription('NestJS Template API')
+    .setTitle('Neko Backend')
+    .setDescription('Neko Backend API')
     .setVersion('1.0')
     .addCookieAuth('access_token')
     .addBearerAuth()
