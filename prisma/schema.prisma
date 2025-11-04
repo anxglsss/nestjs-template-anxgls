@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+model User {
+  id        String  @id @default(uuid())
+  email     String  @unique
+  password  String
+  firstName String
+  lastName  String
+  nickName  String  @unique
+  bio       String?
+
+  posts        Post[]
+  comments     Comment[]
+  postLikes    PostLike[]
+  commentLikes CommentLike[]
+  favorites    PostFavorite[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email, nickName, firstName, lastName])
+  @@map("users")
+}
+
+model Post {
+  id       String  @id @default(uuid())
+  title    String
+  content  String
+  authorId String
+  isPublic Boolean @default(true)
+
+  author    User?          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments  Comment[]      @relation("PostComments")
+  likes     PostLike[]
+  favorites PostFavorite[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([authorId, isPublic, createdAt])
+  @@map("posts")
+}
+
+model Comment {
+  id       String  @id @default(uuid())
+  content  String
+  authorId String
+  postId   String
+  parentId String?
+
+  author  User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post    Post          @relation("PostComments", fields: [postId], references: [id], onDelete: Cascade)
+  parent  Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[]     @relation("CommentReplies")
+  likes   CommentLike[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId, createdAt])
+  @@index([authorId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+model PostLike {
+  id     String @id @default(uuid())
+  userId String
+  postId String
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+  @@index([postId, createdAt])
+  @@map("post_likes")
+}
+
+model CommentLike {
+  id        String @id @default(uuid())
+  userId    String
+  commentId String
+
+  User    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, commentId])
+  @@index([userId])
+  @@index([commentId])
+  @@index([commentId, createdAt])
+  @@map("comment_likes")
+}
+
+model PostFavorite {
+  id     String @id @default(uuid())
+  userId String
+  postId String
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+  @@index([userId, createdAt])
+  @@map("post_favorites")
+}

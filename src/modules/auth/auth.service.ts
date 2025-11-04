@@ -1,4 +1,3 @@
-import { PrismaService } from '@core/prisma/prisma.service';
 import {
   ConflictException,
   Injectable,
@@ -10,6 +9,7 @@ import { toAuthResponse } from '@shared/mappers';
 import { JwtPayload } from '@shared/types/jwt.types';
 import * as bcrypt from 'bcryptjs';
 import { Response } from 'express';
+import { PrismaService } from 'prisma/prisma.service';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';

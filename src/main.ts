@@ -1,6 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { HttpExceptionFilter } from '@shared/filters/http-exception.filter';
 import { GlobalValidationPipe } from '@shared/pipes/global-validation.pipe';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
@@ -21,6 +22,7 @@ async function bootstrap() {
   });
 
   app.useGlobalPipes(GlobalValidationPipe);
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Neko Backend')

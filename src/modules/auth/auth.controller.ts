@@ -1,3 +1,4 @@
+import { JwtAuthGuard } from '@modules/auth/guards/jwt-auth.guard';
 import {
   Body,
   Controller,
@@ -16,16 +17,13 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '@shared/guards/jwt-auth.guard';
-import { Request, Response } from 'express';
+import { CurrentUser } from '@shared/decorators/current-user.decorator';
+import { RequestWithCookies } from '@shared/types/request.types';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-
-type RequestWithCookies = Request & {
-  cookies?: Record<string, string> | undefined;
-};
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -101,7 +99,7 @@ export class AuthController {
     @Req() req: RequestWithCookies,
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthResponseDto> {
-    return this.authService.refresh(req, res);
+    return this.authService.refresh(req as any, res);
   }
 
   @Get('me')
@@ -117,9 +115,7 @@ export class AuthController {
     status: 401,
     description: 'Unauthorized',
   })
-  getCurrentUser(
-    @Req() req: Request & { user: { userId: string } },
-  ): Promise<AuthResponseDto> {
-    return this.authService.getCurrentUser(req.user.userId);
+  getCurrentUser(@CurrentUser() userId: string): Promise<AuthResponseDto> {
+    return this.authService.getCurrentUser(userId);
   }
 }
